@@ -1,5 +1,1 @@
-16:36:50.607 TRACE com.alex.javastudy.log4j.Log4jApp 10 launch - This is a trace message.
-16:36:50.611 DEBUG com.alex.javastudy.log4j.Log4jApp 11 launch - This is a debug message.
-16:36:50.611 WARN  com.alex.javastudy.log4j.Log4jApp 12 launch - This is a warn message.
-16:36:50.611 ERROR com.alex.javastudy.log4j.Log4jApp 13 launch - This is a error message.
-16:36:50.611 FATAL com.alex.javastudy.log4j.Log4jApp 14 launch - This is a fatal message.
+17:13:23.930 DEBUG com.alex.javastudy.spring.resttemplate.RestTemplateDemo 17 launch - IpInfo: IpInfo [country=null, province=null, city=null]

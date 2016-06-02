@@ -28,6 +28,7 @@
     <context:component-scan base-package="com.alex.study.springsecurity.dao"/>
     <context:component-scan base-package="com.alex.study.springsecurity.service"/>
     <context:component-scan base-package="com.alex.study.springsecurity.controller"/>
+    <context:component-scan base-package="com.alex.study.springsecurity.security"/>
 
     <!-- jdbc配置文件-->
     <context:property-placeholder location="classpath:jdbc.properties"/>

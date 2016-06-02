@@ -1,0 +1,5 @@
+rootProject.name = 'JavaStudy'
+include 'jjwt'
+include 'spring-security'
+include 'playground'
+

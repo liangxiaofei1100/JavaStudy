@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -20,6 +23,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JwtAuthenticationTokenFilter extends AbstractAuthenticationProcessingFilter {
     Logger logger = LoggerFactory.getLogger(JwtAuthenticationTokenFilter.class);
@@ -33,7 +38,7 @@ public class JwtAuthenticationTokenFilter extends AbstractAuthenticationProcessi
     private String tokenHeader = "Authorization";
 
     protected JwtAuthenticationTokenFilter() {
-        super("/**");
+        super("/hello");
     }
 
     @Override
@@ -42,21 +47,14 @@ public class JwtAuthenticationTokenFilter extends AbstractAuthenticationProcessi
         String authToken = httpRequest.getHeader(this.tokenHeader);
         String username = jwtTokenUtil.getUsernameFromToken(authToken);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-            logger.info("attemptAuthentication before");
-            if (jwtTokenUtil.validateToken(authToken, userDetails)) {
-                logger.info("attemptAuthentication success.");
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpRequest));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        AppUserAuthenticationToken appUserAuthenticationToken = new AppUserAuthenticationToken(authorities);
 
-                return this.getAuthenticationManager().authenticate(authentication);
-            }
-            logger.info("attemptAuthentication done");
-        }
-        return null;
+
+        return getAuthenticationManager().authenticate(appUserAuthenticationToken);
     }
 
 //    @Override

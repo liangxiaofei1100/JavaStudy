@@ -1,10 +1,8 @@
 package com.alex.study.springsecurity.domain.security.http;
 
-import java.io.Serializable;
+import com.alex.study.springsecurity.domain.common.http.Response;
 
-public class JwtAuthenticationResponse implements Serializable {
-
-    private static final long serialVersionUID = 1250166508152483573L;
+public class JwtAuthenticationResponse extends Response {
 
     private final String token;
 

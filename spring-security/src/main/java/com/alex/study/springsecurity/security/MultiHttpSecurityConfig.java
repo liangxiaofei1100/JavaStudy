@@ -1,14 +1,14 @@
 package com.alex.study.springsecurity.security;
 
-import com.alex.study.springsecurity.service.JwtUserDetailsServiceImpl;
+import com.alex.study.springsecurity.security.app.JwtUserAuthenticationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,8 +20,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import javax.annotation.Resource;
 
 /**
  * 多个Spring security配置
@@ -74,13 +72,35 @@ public class MultiHttpSecurityConfig {
         private JwtAuthenticationFailEntryPoint unAuthenticationEntryPoint;
         @Autowired
         private JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
+        @Autowired
+        private JwtAuthenticationFailHandler jwtAuthenticationFailHandler;
 
-        @Resource
-        private JwtUserDetailsServiceImpl userDetailsService;
+        @Autowired
+        private UserDetailsService userDetailsService;
 
         @Bean
-        public AppUserAuthenticationProvider appUserAuthenticationProvider() {
-            return new AppUserAuthenticationProvider();
+        @Override
+        protected AuthenticationManager authenticationManager() throws Exception {
+            return super.authenticationManager();
+        }
+
+        @Bean
+        public AuthenticationProvider appUserAuthenticationProvider() {
+            logger.debug("appUserAuthenticationProvider");
+            return new JwtUserAuthenticationProvider();
+        }
+
+        @Override
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            logger.debug("configure AuthenticationManagerBuilder");
+            auth.authenticationProvider(appUserAuthenticationProvider());
+            auth.userDetailsService(userDetailsService)
+                    .passwordEncoder(passwordEncoder());
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
         }
 
         // 设置不拦截规则
@@ -117,15 +137,10 @@ public class MultiHttpSecurityConfig {
             JwtAuthenticationTokenFilter authenticationTokenFilter = new JwtAuthenticationTokenFilter();
             authenticationTokenFilter.setAuthenticationManager(authenticationManagerBean());
             authenticationTokenFilter.setAuthenticationSuccessHandler(jwtAuthenticationSuccessHandler);
+            authenticationTokenFilter.setAuthenticationFailureHandler(jwtAuthenticationFailHandler);
             return authenticationTokenFilter;
         }
 
-        @Bean
-        @Override
-        public AuthenticationManager authenticationManagerBean() throws Exception {
-            AuthenticationManager authenticationManager = super.authenticationManagerBean();
-            return authenticationManager;
-        }
 
     }
 }

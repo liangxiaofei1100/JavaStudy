@@ -24,7 +24,6 @@ public class HelloController extends BaseController{
      * Say a hello to test. 测试JDBCTemplate
      */
     @RequestMapping(value = "/hello", method = RequestMethod.GET)
-    @PreAuthorize("hasRole('ADMIN')")
     public
     @ResponseBody
     HelloResponse sayHelloGet() {

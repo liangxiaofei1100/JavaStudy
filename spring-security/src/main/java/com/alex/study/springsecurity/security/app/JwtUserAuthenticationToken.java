@@ -1,4 +1,4 @@
-package com.alex.study.springsecurity.security;
+package com.alex.study.springsecurity.security.app;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +10,7 @@ import java.util.Collection;
 /**
  * app用户认证token
  */
-public class AppUserAuthenticationToken extends AbstractAuthenticationToken {
-    Logger logger = LoggerFactory.getLogger(AppUserAuthenticationToken.class);
+public class JwtUserAuthenticationToken extends AbstractAuthenticationToken {
 
     public String userToken;
 
@@ -21,19 +20,17 @@ public class AppUserAuthenticationToken extends AbstractAuthenticationToken {
      * @param authorities the collection of <tt>GrantedAuthority</tt>s for the principal
      *                    represented by this authentication object.
      */
-    public AppUserAuthenticationToken(Collection<? extends GrantedAuthority> authorities) {
+    public JwtUserAuthenticationToken(Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
     }
 
     @Override
     public Object getCredentials() {
-        logger.debug("getCredentials");
         return null;
     }
 
     @Override
     public Object getPrincipal() {
-        logger.debug("getPrincipal");
         return null;
     }
 }

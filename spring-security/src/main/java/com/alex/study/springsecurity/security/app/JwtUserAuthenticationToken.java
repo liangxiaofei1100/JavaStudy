@@ -1,5 +1,6 @@
 package com.alex.study.springsecurity.security.app;
 
+import com.alex.study.springsecurity.domain.security.db.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -8,11 +9,12 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.Collection;
 
 /**
- * app用户认证token
+ * 自定义的JWT认证token
  */
 public class JwtUserAuthenticationToken extends AbstractAuthenticationToken {
 
-    public String userToken;
+    public String userUuid;
+    public User user;
 
     /**
      * Creates a token with the supplied array of authorities.
@@ -31,6 +33,6 @@ public class JwtUserAuthenticationToken extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
-        return null;
+        return user;
     }
 }

@@ -1,27 +1,13 @@
 package com.alex.study.springsecurity.controller;
 
-import com.alex.study.springsecurity.domain.security.http.JwtAuthenticationRequest;
-import com.alex.study.springsecurity.domain.security.http.JwtAuthenticationResponse;
-import com.alex.study.springsecurity.security.JwtUser;
+import com.alex.study.springsecurity.domain.security.http.*;
 import com.alex.study.springsecurity.security.jwt.JwtTokenUtil;
+import com.alex.study.springsecurity.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 处理登录认证
@@ -32,43 +18,36 @@ public class AuthenticationController {
     Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-    @Autowired
-    private UserDetailsService userDetailsService;
+    private UserService userService;
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST, produces = {"application/json;charset=UTF-8"})
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtAuthenticationRequest authenticationRequest) throws AuthenticationException {
-        logger.info("createAuthenticationToken authenticationRequest=" + authenticationRequest);
-        // Perform the security
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authenticationRequest.username,
-                        authenticationRequest.password
-                )
-        );
+    @RequestMapping(value = "/register", method = RequestMethod.POST, produces = {"application/json;charset=UTF-8"})
+    public
+    @ResponseBody UserRegisterResponse register(@RequestBody UserRegisterRequest request) {
+        logger.info("addRegister() request=" + request);
+        UserRegisterResponse response = userService.addRegister(request);
+        logger.info("addRegister() response=" + response);
 
-        // Reload password post-security so we can generate token
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.username);
-        final String token = jwtTokenUtil.generateToken(userDetails);
-
-        // Return the token
-        return ResponseEntity.ok(new JwtAuthenticationResponse(token));
+        return response;
     }
 
-    @RequestMapping(value = "refresh", method = RequestMethod.GET)
-    public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request) {
-        String token = request.getHeader(JwtTokenUtil.TOKEN_HEADER);
+    @RequestMapping(value = "/login", method = RequestMethod.POST, produces = {"application/json;charset=UTF-8"})
+    public
+    @ResponseBody UserLoginResponse login(@RequestBody UserLoginRequest request) throws AuthenticationException {
+        logger.info("login() request=" + request);
+        UserLoginResponse response = userService.login(request);
+        logger.info("login() response=" + response);
 
-        String username = jwtTokenUtil.getUsernameFromToken(token);
-        JwtUser user = (JwtUser) userDetailsService.loadUserByUsername(username);
+        return response;
+    }
 
-        if (jwtTokenUtil.canTokenBeRefreshed(token, user.getLastPasswordResetDate())) {
-            String refreshedToken = jwtTokenUtil.refreshToken(token);
-            return ResponseEntity.ok(new JwtAuthenticationResponse(refreshedToken));
-        } else {
-            return ResponseEntity.badRequest().body(null);
-        }
+    @RequestMapping(value = "/role", method = RequestMethod.POST, produces = {"application/json;charset=UTF-8"})
+    public
+    @ResponseBody
+    UserRoleResponse getUserRole(@RequestBody UserRoleRequest request) throws AuthenticationException {
+        logger.info("getUserRole() request=" + request);
+        UserRoleResponse response = userService.getUserRole(request);
+        logger.info("getUserRole() response=" + response);
+
+        return response;
     }
 }

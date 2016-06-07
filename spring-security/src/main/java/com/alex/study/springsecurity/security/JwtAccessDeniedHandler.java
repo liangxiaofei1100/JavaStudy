@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
@@ -15,21 +15,20 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
-public class JwtAuthenticationFailHandler implements AuthenticationFailureHandler {
-    Logger logger = LoggerFactory.getLogger(JwtAuthenticationFailHandler.class);
+public class JwtAccessDeniedHandler implements AccessDeniedHandler {
+    Logger logger = LoggerFactory.getLogger(JwtAccessDeniedHandler.class);
 
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        logger.debug("onAuthenticationFailure");
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+        logger.debug("JwtAccessDeniedHandler handle");
 
         Response unauthorizedResponse = new Response();
-        unauthorizedResponse.buildFail("认证失败");
+        unauthorizedResponse.buildFail("权限不足");
 
         response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(HttpStatus.FORBIDDEN.value());
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writeValue(response.getOutputStream(), unauthorizedResponse);
-
     }
 }

@@ -4,6 +4,7 @@ import com.alex.study.springsecurity.domain.common.http.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,8 @@ public class JwtAuthenticationFailEntryPoint implements AuthenticationEntryPoint
         unauthorizedResponse.buildFail("权限不足");
 
         response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writeValue(response.getOutputStream(), unauthorizedResponse);
 

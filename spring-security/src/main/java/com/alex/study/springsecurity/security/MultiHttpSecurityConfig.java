@@ -10,13 +10,11 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -25,15 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * 多个Spring security配置
  */
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
 public class MultiHttpSecurityConfig {
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .inMemoryAuthentication()
-                .withUser("user").password("password").roles("USER").and()
-                .withUser("admin").password("password").roles("USER", "ADMIN");
-    }
 
     @Configuration
     @Order(1)
@@ -74,9 +64,8 @@ public class MultiHttpSecurityConfig {
         private JwtAuthenticationSuccessHandler jwtAuthenticationSuccessHandler;
         @Autowired
         private JwtAuthenticationFailHandler jwtAuthenticationFailHandler;
-
         @Autowired
-        private UserDetailsService userDetailsService;
+        private JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
         @Bean
         @Override
@@ -94,8 +83,6 @@ public class MultiHttpSecurityConfig {
         protected void configure(AuthenticationManagerBuilder auth) throws Exception {
             logger.debug("configure AuthenticationManagerBuilder");
             auth.authenticationProvider(appUserAuthenticationProvider());
-            auth.userDetailsService(userDetailsService)
-                    .passwordEncoder(passwordEncoder());
         }
 
         @Bean
@@ -118,12 +105,12 @@ public class MultiHttpSecurityConfig {
                     // we don't need CSRF becouse our token is invulnerable
                     .csrf().disable()
                     .exceptionHandling().authenticationEntryPoint(unAuthenticationEntryPoint).and()
+                    .exceptionHandling().accessDeniedHandler(jwtAccessDeniedHandler).and()
                     // don't create session
                     .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                     .authorizeRequests()
-                    .antMatchers("/hello").authenticated()
-
-                    .anyRequest().permitAll();
+                    .antMatchers("/admin/**").hasRole("ADMIN")
+                    .antMatchers("/user/**").hasRole("USER");
 
             // Custom JWT based security filter
             http.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
@@ -138,9 +125,8 @@ public class MultiHttpSecurityConfig {
             authenticationTokenFilter.setAuthenticationManager(authenticationManagerBean());
             authenticationTokenFilter.setAuthenticationSuccessHandler(jwtAuthenticationSuccessHandler);
             authenticationTokenFilter.setAuthenticationFailureHandler(jwtAuthenticationFailHandler);
+
             return authenticationTokenFilter;
         }
-
-
     }
 }

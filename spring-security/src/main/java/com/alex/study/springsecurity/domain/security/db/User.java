@@ -3,6 +3,7 @@ package com.alex.study.springsecurity.domain.security.db;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "USER")
@@ -13,27 +14,30 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(name = "UUID", unique = true, nullable = false)
+    private String uuid = UUID.randomUUID().toString();
+
     @Column(name = "USERNAME", length = 50, unique = true, nullable = false)
     private String username;
 
     @Column(name = "PASSWORD", length = 100, nullable = false)
     private String password;
 
-    @Column(name = "FIRSTNAME", length = 50, nullable = false)
+    @Column(name = "FIRSTNAME", length = 50, nullable = true)
     private String firstname;
 
-    @Column(name = "LASTNAME", length = 50, nullable = false)
+    @Column(name = "LASTNAME", length = 50, nullable = true)
     private String lastname;
 
-    @Column(name = "EMAIL", length = 50, nullable = false)
+    @Column(name = "EMAIL", length = 50, nullable = true)
     private String email;
 
     @Column(name = "ENABLED", nullable = false)
-    private Boolean enabled;
+    private Boolean enabled = true;
 
     @Column(name = "LASTPASSWORDRESETDATE", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date lastPasswordResetDate;
+    private Date lastPasswordResetDate = new Date();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -112,5 +116,13 @@ public class User {
 
     public void setLastPasswordResetDate(Date lastPasswordResetDate) {
         this.lastPasswordResetDate = lastPasswordResetDate;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

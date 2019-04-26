@@ -1,5 +1,7 @@
 package com.alex.study.design.proxy;
 
+import net.sf.cglib.proxy.Enhancer;
+
 import java.lang.reflect.Proxy;
 
 /**
@@ -23,7 +25,10 @@ public class ProxyDemo {
 
         System.out.println("===CGlib动态代理===");
         BuyHouseMethodInterceptor buyHouseMethodInterceptor = new BuyHouseMethodInterceptor();
-        BuyHouse cglibDynamicProxy = buyHouseMethodInterceptor.getInstance();
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(BuyHouseImpl.class);
+        enhancer.setCallback(buyHouseMethodInterceptor);
+        BuyHouse cglibDynamicProxy = (BuyHouseImpl) enhancer.create();
         cglibDynamicProxy.buyHouse();
     }
 }
